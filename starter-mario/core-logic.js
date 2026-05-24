@@ -31,8 +31,14 @@ function detectCollisionType(playerX, playerY, entityX, entityY) {
   // 3. Now check WHERE they hit:
   //    If playerY is significantly higher than entityY (e.g., playerY - entityY > 20), return 'top'
   // 4. Otherwise, it must be a side hit, so return 'side'
-
-  return 'none';
+  if (distX >= 40 || distY >= 40){
+      return 'none';
+        }
+  if (playerY - entityY > 20) {
+    return 'top';
+  } else {
+    return 'side';
+  }
 }
 
 /**
@@ -49,8 +55,18 @@ function calculateItemScore(itemType) {
   // 'fireflower' -> 2000
   // 'star' -> 5000
   // default -> 0
-
-  return 0;
+  switch (itemType){
+    case 'coin':
+      return 100;
+     case 'mushroom':
+      return 1000;
+     case 'fireflower':
+      return 2000;
+     case 'star':
+      return 5000;
+     default:
+      return 0;
+  }
 }
 
 /**
@@ -67,8 +83,15 @@ function handleEnemyInteraction(collisionType, isInvincible) {
   // 2. If isInvincible is true, Mario is powerful! Return 'defeat_enemy'
   // 3. If collisionType is 'top', Mario jumped on it! Return 'defeat_enemy'
   // 4. Otherwise (it must be 'side'), Mario gets hurt! Return 'mario_takes_damage'
-
-  return 'nothing';
+  if (collisionType === 'none'){
+    return 'nothing';
+  } else if(isInvincible){
+    return 'defeat_enemy';
+  } else if (collisionType === 'top'){
+    return 'defeat_enemy';
+  } else {
+    return 'mario_takes_damage';
+  }
 }
 
 /**
@@ -86,10 +109,15 @@ function shouldLandOnPlatform(playerY, playerVY, platformY) {
   // 1. He is falling (playerVY < 0)
   // 2. AND his feet (playerY) are above or at the platform surface (playerY >= platformY)
   // 3. AND he is close enough to the top that he should snap to it (playerY - platformY < 30)
-
+  if (playerVY < 0){
+    if(playerY >= platformY){
+      if(playerY - platformY < 30){
+          return true;
+        }
+      }  
+  }
   return false;
 }
-
 /**
  * Task 5: Walking Speed Logic
  * Mario moves faster when dashing (holding Shift).
@@ -101,8 +129,11 @@ function getWalkingSpeed(isDashing) {
   // TODO: Use IF/ELSE
   // 1. If dashing is true, return 12 (high speed)
   // 2. Otherwise, return 7 (normal speed)
-
-  return 7;
+  if (isDashing){
+      return 12;
+    } else{
+    return 7;
+  }
 }
 
 /**
@@ -116,8 +147,11 @@ function getJumpPower(hasMushroom) {
   // TODO: Use IF/ELSE
   // 1. If hasMushroom is true, return 25 (Super Jump)
   // 2. Otherwise, return 18 (Normal Jump)
-
-  return 18;
+  if (hasMushroom){
+      return 25;
+    } else{
+    return 18;
+  }
 }
 
 /**
@@ -134,8 +168,15 @@ function getStatusMessage(lives, hasStarPower) {
   // 2. Else if lives is 1, return "⚠️ LAST CHANCE! ⚠️"
   // 3. Else if lives is 0, return "💀 GAME OVER 💀"
   // 4. Otherwise, return "🍄 MARIO IS READY! 🍄"
-
-  return "RUNNING";
+  if (hasStarPower){
+    return "🌟 INVINCIBLE! 🌟";
+  } else if(lives === 1){
+    return "⚠️ LAST CHANCE! ⚠️";
+  } else if( lives === 0){
+    return "💀 GAME OVER 💀";
+  } else {
+    return "🍄 MARIO IS READY! 🍄";
+  }
 }
 
 /**
@@ -153,7 +194,15 @@ function getGravityMultiplier(isJumping, isDashing) {
   // 2. If he is Jumping AND Dashing, return 0.8 (Floaty Jump)
   // 3. If he is Dashing but NOT jumping, return 2.5 (Fast Ground Physics)
   // 4. Otherwise, return 1.2
-
+  if (!isJumping && !isDashing){
+    return 1.2;
+  }
+  if (isJumping && isDashing){
+    return 0.8;
+  }
+  if (!isJumping && isDashing){
+    return 2.5;
+  }
   return 1.2;
 }
 
@@ -173,6 +222,12 @@ function getFinalScore(basePoints, comboMultiplier, isStarActive) {
   //      - Add 500 bonus points to the total.
   //      - If the basePoints was already high (> 500), add ANOTHER 1000 points!
   // 3. Return the total.
-
-  return 0;
+  let total = basePoints * comboMultiplier;
+  if (isStarActive){
+    total = total + 500;
+    if(basePoints > 500){
+      total = total + 1000;
+    }
+  }
+  return total;
 }
